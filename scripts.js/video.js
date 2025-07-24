@@ -1,3 +1,13 @@
+
+function getTimeString(time) {
+    // get hour and res seconds
+    const hour = parseInt(time / 3600);
+    let remainingSecond = time % 3600;
+    const minute = parseInt(remainingSecond / 60);
+    remainingSecond = remainingSecond % 60;
+    return `${hour} hrs ${minute} min ago`
+}
+
 //create loadCategories 
 const loadCategories = () => {
     fetch('https://openapi.programming-hero.com/api/phero-tube/categories')
@@ -6,17 +16,38 @@ const loadCategories = () => {
         .catch((error) => console.log(error))
 }
 
+const loadCategoriesVideo = (id) => {
+    fetch(`https://openapi.programming-hero.com/api/phero-tube/category/${id}`)
+        .then(res => res.json())
+        .then(data => displayVideos(data.category))
+        .catch((error) => console.log(error))
+}
+
 //Create DisplayCategories
 
+// const displayCategories = (categories) => {
+//     const categoryContainer = document.getElementById('categories')
+//     categories.forEach((item) => {
+//         console.log(item)
+//         //create a button
+//         const button = document.createElement('button');
+//         button.classList.add('btn');
+//         button.innerText = item.category;
+//         categoryContainer.append(button)
+//     })
+// }
 const displayCategories = (categories) => {
     const categoryContainer = document.getElementById('categories')
     categories.forEach((item) => {
         console.log(item)
         //create a button
-        const button = document.createElement('button');
-        button.classList.add('btn');
-        button.innerText = item.category
-        categoryContainer.append(button)
+        const buttonContainer = document.createElement('div');
+        buttonContainer.innerHTML = `
+        <button onclick='loadCategoriesVideo(${item.category_id})' class='btn'>
+        ${item.category}
+        </button>
+        `
+        categoryContainer.append(buttonContainer)
     })
 }
 
@@ -48,6 +79,21 @@ const loadVideos = () => {
 
 const displayVideos = (videos) => {
     const videoContainer = document.getElementById('videos')
+    videoContainer.innerHTML = '';
+
+    if (videos.length === 0) {
+        videoContainer.classList.remove('grid')
+        videoContainer.innerHTML = `
+    <div class ='min-h-[300px] flex flex-col gap-5 justify-center items-center'>
+        <img src='assets/Icon.png'/>
+        <h2 class='text-center text-xl font-bold'>No Content Here in this Category</h2>
+    </div>
+    `
+        return
+    }else{
+        videoContainer.classList.add('grid')
+    }
+
     videos.forEach((video) => {
         console.log(video);
 
@@ -59,9 +105,13 @@ const displayVideos = (videos) => {
                     src=${video.thumbnail}
                     class='h-full w-full object-cover'
                     alt=${video.title} />
-                    <span class='absolute right-2 bottom-2 bg-black rounded p-1 text-white' >
-                        ${video.others.posted_date}
-                    </span>
+                    ${video.others.posted_date?.length === 0
+                ? ''
+                : `<span class='absolute right-2 bottom-2 bg-black rounded p-1 text-white text-xs' >
+                    ${getTimeString(video.others.posted_date)}
+                </span>`
+            }
+                    
             </figure>
             <div class="px-0 py-2 flex gap-2">
                 <div>
