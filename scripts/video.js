@@ -8,11 +8,11 @@ function getTimeString(time) {
     return `${hour} hrs ${minute} min ago`
 }
 
-const removeActiveClass = ()=>{
-const buttons = document.getElementsByClassName('category-btn');
-for (const btn of buttons) {
-    btn.classList.remove('active')
-}
+const removeActiveClass = () => {
+    const buttons = document.getElementsByClassName('category-btn');
+    for (const btn of buttons) {
+        btn.classList.remove('active')
+    }
 }
 
 //create loadCategories 
@@ -33,6 +33,34 @@ const loadCategoriesVideo = (id) => {
             displayVideos(data.category)
         })
         .catch((error) => console.log(error))
+}
+
+const loadVideos = (searchText='') => {
+    fetch(`https://openapi.programming-hero.com/api/phero-tube/videos?title=${searchText}`)
+        .then(res => res.json())
+        .then(data => displayVideos(data.videos))
+        .catch((error) => console.log(error))
+}
+
+const loadDetails = async (videoId) => {
+    const url = `https://openapi.programming-hero.com/api/phero-tube/video/${videoId}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    displayDetails(data.video)
+}
+
+const displayDetails = (video) => {
+    const detailContainer = document.getElementById('modal-content');
+
+    detailContainer.innerHTML=`
+    <img src=${video.thumbnail} class='w-full' />
+    <p>${video.description}</p>
+    `
+
+    // way-1
+    // document.getElementById('showModalData').click();
+    // way-2
+    document.getElementById('customModal').showModal();
 }
 
 //Create DisplayCategories
@@ -61,13 +89,6 @@ const displayCategories = (categories) => {
         `
         categoryContainer.append(buttonContainer)
     })
-}
-
-const loadVideos = () => {
-    fetch('https://openapi.programming-hero.com/api/phero-tube/videos')
-        .then(res => res.json())
-        .then(data => displayVideos(data.videos))
-        .catch((error) => console.log(error))
 }
 
 // const cardDemo = {
@@ -102,7 +123,7 @@ const displayVideos = (videos) => {
     </div>
     `
         return
-    }else{
+    } else {
         videoContainer.classList.add('grid')
     }
 
@@ -139,13 +160,20 @@ const displayVideos = (videos) => {
                     src='https://img.icons8.com/?size=48&id=D9RtvkuOe31p&format=png' />` : ''}
                     
                     </div>
-                    <p></p>
+                    <p>
+                    <button onclick="loadDetails('${video.video_id}')" class='btn btn-sm btn-error'>Details</button>
+                    </p>
                 </div>
             </div>
         `
         videoContainer.append(card)
     })
 }
+
+
+document.getElementById('search-input').addEventListener('keyup',(e)=>{
+    loadVideos(e.target.value)
+})
 
 loadCategories()
 loadVideos()
